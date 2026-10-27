@@ -1,0 +1,1645 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Mazda 13B — rotary x-ray</title><style>
+*{box-sizing:border-box}
+html,body{margin:0;background:#08090c;color:#aab4c0;font:14px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+body{-webkit-font-smoothing:antialiased}
+.v8x{max-width:1180px;margin:0 auto;padding:34px 22px 60px}
+.v8x-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin:8px 0 20px}
+.v8x-head h1{font-size:37px;line-height:1.02;letter-spacing:-.025em;color:#e8eef6;font-weight:600;margin:0}
+.v8x-head h1 em{font-style:normal;color:#7f8b99;font-weight:400}
+.v8x-sub{margin:10px 0 0;max-width:60ch;color:#7e8a98;font-size:13.5px}
+.v8x-meta{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#63707e;text-align:right;line-height:1.9;white-space:nowrap}
+.v8x-card{position:relative;background:#0d1015;border:1px solid #1d232c;border-radius:10px;padding:18px;box-shadow:0 30px 80px -50px #000}
+.v8x-corners{position:absolute;inset:12px 16px;pointer-events:none;z-index:2}
+.v8x-corner{position:absolute;font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:10px;letter-spacing:.07em;color:#697683;white-space:nowrap}
+.v8x-corner.fig{top:0;left:0;color:#aeb9c6;text-shadow:0 1px 6px #000}
+.v8x-corner.title{top:0;right:0;text-transform:uppercase;letter-spacing:.14em;text-shadow:0 1px 6px #000}
+.v8x-corner.hint{bottom:0;left:0;text-transform:uppercase;letter-spacing:.1em;text-shadow:0 1px 6px #000}
+.v8x-corner.readout{right:0;bottom:0;color:#d6e2ee;font-variant-numeric:tabular-nums;text-shadow:0 1px 6px #000}
+#stage{position:relative;width:100%;aspect-ratio:16/9.6;min-height:320px;max-height:72vh;border-radius:6px;overflow:hidden;background:radial-gradient(circle at 50% 42%,#121722,#07080b 70%);cursor:grab}
+#stage.dragging{cursor:grabbing}
+#stage canvas{display:block;width:100%;height:100%;touch-action:none}
+.v8x-controls{display:flex;align-items:center;gap:22px;margin-top:14px;padding:0 2px;flex-wrap:wrap}
+.v8x-play{appearance:none;border:1px solid #2b333e;background:#141922;color:#d8e2ec;border-radius:6px;padding:7px 14px;font:11px/1 ui-monospace,Menlo,monospace;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+.v8x-play:hover{border-color:#3b4654;background:#18202a}
+.v8x-views{display:inline-flex;border:1px solid #2b333e;border-radius:6px;overflow:hidden}
+.v8x-view{appearance:none;border:0;border-left:1px solid #2b333e;background:#10151c;color:#9fadbc;padding:7px 11px;font:10px/1 ui-monospace,Menlo,monospace;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+.v8x-view:first-child{border-left:0}
+.v8x-view:hover{background:#18202a;color:#e2ebf4}
+.v8x-rpm{display:flex;align-items:center;gap:10px;font:10.5px/1 ui-monospace,Menlo,monospace;letter-spacing:.1em;text-transform:uppercase;color:#7c8997}
+.v8x-rpm input{width:190px;accent-color:#8fb6e0}
+.v8x-rpm output{min-width:38px;text-align:right;color:#d3dce6;font-size:12px}
+.v8x-chips{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+.v8x-chip{position:relative;width:29px;height:29px;border-radius:50%;border:1px solid #2a323d;display:grid;place-items:center;font:10px/1 ui-monospace,Menlo,monospace;color:#b9c4d0;background:#10151c;transition:box-shadow .2s,border-color .2s}
+.v8x-chip::before{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--gas,#223);opacity:var(--gasA,.3);filter:saturate(1.2)}
+.v8x-chip span{position:relative;z-index:1;text-shadow:0 1px 2px #000}
+.v8x-chip.fire{border-color:#e8f0f8;box-shadow:0 0 0 1px #e8f0f8,0 0 14px -2px #fff}
+.v8x-legend{display:flex;flex-wrap:wrap;gap:8px 22px;align-items:center;margin:16px 2px 0;color:#75818f;font-size:12.5px}
+.v8x-legend2{margin-top:8px;opacity:.85}
+.v8x-key{display:inline-flex;align-items:center;gap:7px}
+.v8x-dot{width:9px;height:9px;border-radius:50%;box-shadow:0 0 10px -2px currentColor;background:currentColor}
+.v8x-note{margin:12px 2px 0;color:#5f6b78;font-size:12.5px;max-width:86ch}
+.v8x-links{margin:10px 2px 0;color:#67737f;font-size:12.5px}
+.v8x-links a{color:#9fb4c8;text-decoration:none;border-bottom:1px solid #2a3440}
+.v8x-links a:hover{color:#dbe6f0;border-color:#4a5a6a}
+@media(max-width:720px){.v8x{padding:22px 12px 44px}.v8x-head{flex-direction:column;align-items:flex-start}.v8x-head h1{font-size:29px}.v8x-meta{text-align:left}.v8x-card{padding:10px}.v8x-corners{inset:8px 10px}.v8x-corner.title{display:none}.v8x-corner.hint{display:none}#stage{aspect-ratio:4/3.6}.v8x-controls{gap:12px}.v8x-rpm input{width:140px}.v8x-chips{margin-left:0;width:100%}}
+@media(prefers-reduced-motion:reduce){.v8x-chip{transition:none}}
+</style></head>
+<body><main class="v8x">
+  <header class="v8x-head">
+    <div><h1>13B <em>— rotary x-ray</em></h1>
+      <p class="v8x-sub">A Mazda 13B: two three-flank rotors on one eccentric shaft. Each face runs intake, compression, power and exhaust in one rotor turn, while the eccentric shaft turns three times. Watch cold charge enter through the side ports, squeeze to yellow, light at the leading and trailing plugs, and leave orange through the peripheral exhaust. The two live cards stay on rotor 1 face A; only their leader lines follow the charge and its petrol spray.</p>
+    </div>
+    <div class="v8x-meta">654 cc × 2 · 1.3 L<br>9.0 : 1 · 105 mm R · e 15<br>eccentric 3:1 · leading + trailing</div>
+  </header>
+  <section class="v8x-card">
+    <div id="stage"><canvas id="view" role="img" aria-label="A transparent Mazda 13B rotary engine with two three-flank rotors, live gas and two rotor 1 cards for stroke and spray; drag to orbit."></canvas>
+      <div class="v8x-corners">
+        <span class="v8x-corner fig">Fig 1</span>
+        <span class="v8x-corner title">13B · transparent · live gas</span>
+        <span class="v8x-corner hint">Drag to orbit · scroll to zoom · double-click resets</span>
+        <span class="v8x-corner readout" data-readout>ecc 90° · rotor 30° · R1A firing</span>
+      </div>
+    </div>
+    <div class="v8x-controls">
+      <button class="v8x-play" id="play" aria-pressed="false">Pause</button>
+      <div class="v8x-views" role="group" aria-label="camera views">
+        <button class="v8x-view" data-view="front">Front</button><button class="v8x-view" data-view="rear">Output</button><button class="v8x-view" data-view="top">Top</button>
+      </div>
+      <label class="v8x-rpm">ECCENTRIC RPM <input id="rpm" type="range" min="6" max="600" step="1" value="24"><output id="rpmValue">24</output></label>
+      <div class="v8x-chips" aria-label="chamber states">
+        <span class="v8x-chip" data-chip="0"><span>1A</span></span><span class="v8x-chip" data-chip="1"><span>1B</span></span><span class="v8x-chip" data-chip="2"><span>1C</span></span><span class="v8x-chip" data-chip="3"><span>2A</span></span><span class="v8x-chip" data-chip="4"><span>2B</span></span><span class="v8x-chip" data-chip="5"><span>2C</span></span>
+      </div>
+    </div>
+  </section>
+  <div class="v8x-legend">
+    <span class="v8x-key"><span class="v8x-dot" style="color:#3aa0ff"></span>cold intake charge</span>
+    <span class="v8x-key"><span class="v8x-dot" style="color:#ffd040"></span>compressed</span>
+    <span class="v8x-key"><span class="v8x-dot" style="color:#ff3826"></span>ignition</span>
+    <span class="v8x-key"><span class="v8x-dot" style="color:#ff8a2c"></span>power / exhaust</span>
+    <span class="v8x-key"><span class="v8x-dot" style="color:#d6e4f2"></span>housing outline</span>
+  </div>
+  <div class="v8x-legend v8x-legend2">
+    <span class="v8x-key"><span class="v8x-dot" style="color:#79b7ce"></span>rotor housings</span>
+    <span class="v8x-key"><span class="v8x-dot" style="color:#bac3cf"></span>rotors + apex seals</span>
+    <span class="v8x-key"><span class="v8x-dot" style="color:#d6a468"></span>eccentric shaft</span>
+    <span class="v8x-key"><span class="v8x-dot" style="color:#cfb684"></span>stationary gears</span>
+    <span class="v8x-key"><span class="v8x-dot" style="color:#5ab4d8"></span>side intake</span>
+    <span class="v8x-key"><span class="v8x-dot" style="color:#d08a4c"></span>peripheral exhaust</span>
+    <span class="v8x-key"><span class="v8x-dot" style="color:#e8e2d0"></span>spark plugs</span>
+    <span class="v8x-key"><span class="v8x-dot" style="color:#ffc45a"></span>petrol injection</span>
+  </div>
+  <p class="v8x-note">The rotor housings and side plates are glass, and the front side is cut away to show rotor 1; the rotors, apex seals, eccentric shaft and gears stay solid inside. Each rotor is a three-flank Wankel with a 105 mm generating radius and a 15 mm eccentricity, 80 mm wide, sweeping 654 cc; the pair displaces 1.3 litres at 9.0:1. The rotor ring gear has 51 teeth against a fixed 34-tooth stationary gear, so the rotors turn at one third of the eccentric shaft. The leading plug fires first, the trailing plug follows, and each rotor fires alternately every 180° of eccentric rotation. Blue and orange streams show the side-port intake and the peripheral exhaust; the amber mist is port injection. The two live cards are fixed in the drawing at rotor 1 face A; only their leaders follow the charge and spray.</p>
+  <p class="v8x-links">Also: <a href="https://speedy-silver-ua7heb2.tmp.now">the V8 x-ray</a> · Mazda 13B-REW proportions · 654 cc × 2</p>
+</main>
+<script type="module">
+// rotary-model.mjs — Mazda 13B (13B-REW) truth for the x-ray viewer.
+// Geometry is a true epitrochoid housing / inner-envelope rotor:
+//   generating radius R = 105 mm, eccentricity e = 15 mm, rotor width 80 mm.
+// Swept volume per rotor = 3*sqrt(3)*R*e*w = 654 cc; two rotors = 1308 cc.
+// The rotor runs at one third of the eccentric shaft (51/34 stationary gear).
+
+const R13B = (() => {
+  const DEG = Math.PI / 180;
+  const TAU = Math.PI * 2;
+  const R = 105;
+  const E = 15;
+  const W = 80;
+  const GAP = 7.438; // rotor-to-housing clearance at TDC, tuned to 9.0:1
+
+  const mod = (a, n) => ((a % n) + n) % n;
+  const housingPoint = (v) => [
+    E * Math.cos(3 * v) + R * Math.cos(v),
+    E * Math.sin(3 * v) + R * Math.sin(v),
+  ];
+  const housingRadius = (v) => Math.hypot(...housingPoint(v));
+  const TDC = 90 * DEG;
+  const TC = [0, E];
+  const tdcDist = (v) => {
+    const p = housingPoint(v);
+    return Math.hypot(p[0] - TC[0], p[1] - TC[1]);
+  };
+  const flankRadius = (a) => tdcDist(30 * DEG + a) - GAP * Math.sin(Math.PI * (a / (120 * DEG)));
+
+  // firing TDC (eccentric degrees) for [rotor][face]; all at the top lobe.
+  const FIRING = [
+    [90, 810, 450],
+    [990, 630, 270],
+  ];
+  const FACES = ["A", "B", "C"];
+  const CHAMBERS = [];
+  for (let ri = 0; ri < 2; ri++) {
+    for (let face = 0; face < 3; face++) {
+      CHAMBERS.push({
+        i: CHAMBERS.length,
+        rotor: ri,
+        face,
+        label: `R${ri + 1}${FACES[face]}`,
+        fire: FIRING[ri][face],
+        x: ri === 0 ? 60 : -60,
+      });
+    }
+  }
+  const phaseOf = (theta, c) => mod(theta - c.fire, 1080);
+
+  const rotorCenter = (theta, ri) => {
+    const th = theta * DEG;
+    return [E * Math.cos(th + (ri ? Math.PI : 0)), E * Math.sin(th + (ri ? Math.PI : 0))];
+  };
+  const rotorPhi = (theta, ri) => (theta * DEG) / 3 + (ri ? Math.PI / 3 : 0);
+
+  // The chamber between two apexes: the housing arc, then the rotor flank back.
+  function chamberPoly(theta, c, n = 64, m = 24) {
+    const [cx, cy] = rotorCenter(theta, c.rotor);
+    const phi = rotorPhi(theta, c.rotor);
+    const a0 = phi + c.face * TAU / 3;
+    const a1 = a0 + TAU / 3;
+    const pts = [];
+    for (let i = 0; i <= n; i++) {
+      const v = a0 + (a1 - a0) * i / n;
+      pts.push(housingPoint(v));
+    }
+    for (let i = m; i >= 0; i--) {
+      const a = (i / m) * 120 * DEG;
+      const rr = flankRadius(a) + 0.001;
+      const ang = phi + c.face * TAU / 3 + a;
+      pts.push([cx + rr * Math.cos(ang), cy + rr * Math.sin(ang)]);
+    }
+    return pts;
+  }
+
+  const polyArea = (pts) => {
+    let s = 0;
+    for (let i = 0; i < pts.length; i++) {
+      const a = pts[i], b = pts[(i + 1) % pts.length];
+      s += a[0] * b[1] - b[0] * a[1];
+    }
+    return Math.abs(s / 2);
+  };
+  function chamberCentroid(theta, c) {
+    const pts = chamberPoly(theta, c);
+    let x = 0, y = 0;
+    for (const p of pts) { x += p[0]; y += p[1]; }
+    return [x / pts.length, y / pts.length];
+  }
+  const chamberVolumeCC = (theta, c) => polyArea(chamberPoly(theta, c)) * W / 1000;
+
+  const lerpC = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+  const GAS = {
+    blue: [58, 160, 255],
+    yellow: [255, 208, 64],
+    red: [255, 54, 38],
+    orange: [255, 138, 44],
+  };
+
+  const STAGES = { power: "POWER STROKE", exhaust: "EXHAUST STROKE", intake: "INTAKE STROKE", compression: "COMPRESSION STROKE" };
+  function gasState(psi) {
+    psi = mod(psi, 1080);
+    let color, alpha, phase;
+    if (psi < 270) {
+      const t = psi / 270;
+      color = lerpC(GAS.red, GAS.orange, t);
+      alpha = 0.55 - 0.16 * t;
+      phase = "power";
+    } else if (psi < 540) {
+      const t = (psi - 270) / 270;
+      color = GAS.orange;
+      alpha = 0.38 * (1 - 0.72 * t);
+      phase = "exhaust";
+    } else if (psi < 570) {
+      const t = (psi - 540) / 30;
+      const e = t * t * (3 - 2 * t);
+      color = lerpC(GAS.orange, GAS.blue, e);
+      alpha = 0.12 + 0.04 * e;
+      phase = "overlap";
+    } else if (psi < 810) {
+      const t = (psi - 570) / 240;
+      color = GAS.blue;
+      alpha = 0.16 + 0.24 * t;
+      phase = "intake";
+    } else {
+      const t = (psi - 810) / 270;
+      color = lerpC(GAS.blue, GAS.yellow, t);
+      alpha = 0.3 + 0.3 * t;
+      phase = "compression";
+    }
+    return { psi, color, alpha, phase };
+  }
+  const stageFor = (psi) => STAGES[gasState(psi).phase === "overlap" ? "intake" : gasState(psi).phase];
+
+  const INTAKE = [560, 850];
+  const EXHAUST = [200, 550];
+  const INJECT = [620, 780];
+  const portOpen = (psi, type) => {
+    psi = mod(psi, 1080);
+    const [a, b] = type === "intake" ? INTAKE : EXHAUST;
+    return psi >= a && psi <= b;
+  };
+  const portPulse = (psi, type) => {
+    psi = mod(psi, 1080);
+    const [a, b] = type === "intake" ? INTAKE : EXHAUST;
+    if (psi < a || psi > b) return 0;
+    return Math.sin(Math.PI * (psi - a) / (b - a)) ** 0.7;
+  };
+  const sprayOn = (psi) => {
+    psi = mod(psi, 1080);
+    return psi >= INJECT[0] && psi <= INJECT[1];
+  };
+  const sprayStrength = (psi) => {
+    psi = mod(psi, 1080);
+    if (psi < INJECT[0] || psi > INJECT[1]) return 0;
+    return Math.sin(Math.PI * (psi - INJECT[0]) / (INJECT[1] - INJECT[0]));
+  };
+
+  function firingChamber(theta) {
+    let best = CHAMBERS[0], bp = 1e9;
+    for (const c of CHAMBERS) {
+      const p = phaseOf(theta, c);
+      if (p < bp) { bp = p; best = c; }
+    }
+    return best;
+  }
+
+  const PORTS = {
+    intake: 315 * DEG,
+    exhaust: 215 * DEG,
+    lead: 96 * DEG,
+    trail: 84 * DEG,
+    intakeR: 78,
+    exhaustR: housingRadius(215 * DEG),
+    plugR: housingRadius(96 * DEG),
+  };
+
+  const X = {
+    front: [20, 100],
+    rear: [-100, -20],
+    mid: [-20, 20],
+    endFront: [100, 122],
+    endRear: [-122, -100],
+    frontGear: [90, 98],
+    rearGear: [-98, -90],
+    frontCenter: 60,
+    rearCenter: -60,
+    pulley: [122, 158],
+    flywheel: [-158, -122],
+  };
+
+  const selected = CHAMBERS[0];
+  const selectedRear = CHAMBERS[3];
+
+  return {
+    R, E, W, GAP, FIRING, CHAMBERS, FACES, X, PORTS, INTAKE, EXHAUST, INJECT,
+    GAS, STAGES, selected, selectedRear,
+    housingPoint, housingRadius, rotorCenter, rotorPhi, flankRadius, chamberPoly,
+    chamberCentroid, chamberVolumeCC, phaseOf, gasState, stageFor, portOpen, portPulse,
+    sprayOn, sprayStrength, firingChamber, polyArea, mod,
+  };
+})();
+
+// rotary3d.mjs — 13B x-ray scene. Geometry follows R13B: a true epitrochoid
+// housing, three-flank inner-envelope rotor, 3:1 stationary/ring gears.
+
+
+const DEG = Math.PI / 180;
+const TAU = Math.PI * 2;
+const P = R13B;
+
+const MAT = {
+  plinth: { fill: [150, 158, 168], alpha: 0.08, edge: [178, 190, 202], edgeAlpha: 0.22, hidden: 0.01 },
+  plate: { fill: [98, 136, 176], alpha: 0.1, edge: [142, 186, 228], edgeAlpha: 0.07, hidden: 0 },
+  housing: { fill: [88, 156, 190], alpha: 0.13, edge: [150, 218, 246], edgeAlpha: 0.26, hidden: 0 },
+  port: { fill: [24, 30, 38], alpha: 0.9, edge: [244, 198, 120], edgeAlpha: 0.5, hidden: 0 },
+  intake: { fill: [72, 162, 214], alpha: 0.26, edge: [136, 212, 246], edgeAlpha: 0.34, hidden: 0 },
+  exhaust: { fill: [198, 128, 70], alpha: 0.27, edge: [242, 180, 116], edgeAlpha: 0.36, hidden: 0 },
+  detail: { fill: [140, 158, 180], alpha: 0.3, edge: [196, 214, 236], edgeAlpha: 0.3, hidden: 0 },
+  rotor: { fill: [98, 104, 114], alpha: 1, edge: [214, 224, 238], edgeAlpha: 0.55, hidden: 0 },
+  seal: { fill: [226, 232, 240], alpha: 1, edge: [255, 255, 255], edgeAlpha: 0.7, hidden: 0 },
+  shaft: { fill: [188, 148, 94], alpha: 1, edge: [250, 214, 158], edgeAlpha: 0.5, hidden: 0 },
+  gear: { fill: [164, 146, 112], alpha: 1, edge: [238, 220, 178], edgeAlpha: 0.55, hidden: 0 },
+  flywheel: { fill: [150, 155, 168], alpha: 1, edge: [224, 232, 244], edgeAlpha: 0.35, hidden: 0 },
+  plug: { fill: [238, 234, 220], alpha: 1, edge: [255, 252, 240], edgeAlpha: 0.5, hidden: 0 },
+  plugMetal: { fill: [176, 182, 192], alpha: 1, edge: [240, 246, 252], edgeAlpha: 0.5, hidden: 0 },
+  coil: { fill: [56, 60, 69], alpha: 1, edge: [150, 162, 176], edgeAlpha: 0.45, hidden: 0 },
+  fuel: { fill: [206, 158, 78], alpha: 1, edge: [255, 212, 132], edgeAlpha: 0.6, hidden: 0 },
+};
+
+// ---------------- mesh helpers ----------------
+const unit = (a) => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; };
+const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+const mesh = () => ({ v: [], f: [] });
+const addV = (m, p) => { m.v.push(p); return m.v.length - 1; };
+const frameOf = (o, a, u, v) => ({ o, a: unit(a), u: unit(u), v: unit(v) });
+const frameAlong = (o, a) => {
+  const axis = unit(a);
+  const helper = Math.abs(axis[2]) > 0.9 ? [1, 0, 0] : [0, 0, 1];
+  const u = unit(cross(helper, axis));
+  const v = cross(axis, u);
+  return { o, a: axis, u, v };
+};
+const pointOf = (F, s, r, ang) => {
+  const c = Math.cos(ang), n = Math.sin(ang);
+  return [
+    F.o[0] + F.a[0] * s + r * (c * F.u[0] + n * F.v[0]),
+    F.o[1] + F.a[1] * s + r * (c * F.u[1] + n * F.v[1]),
+    F.o[2] + F.a[2] * s + r * (c * F.u[2] + n * F.v[2]),
+  ];
+};
+const orient = (m) => {
+  if (!m.v.length) return;
+  const c = m.v.reduce((a, p) => [a[0] + p[0], a[1] + p[1], a[2] + p[2]], [0, 0, 0]).map((x) => x / m.v.length);
+  for (const face of m.f) {
+    if (face.length < 3) continue;
+    const [a, b, d] = face.slice(0, 3).map((i) => m.v[i]);
+    const n = cross(sub(b, a), sub(d, a));
+    const fc = face.reduce((acc, i) => [acc[0] + m.v[i][0], acc[1] + m.v[i][1], acc[2] + m.v[i][2]], [0, 0, 0]).map((x) => x / face.length);
+    if (dot(n, sub(fc, c)) < 0) face.reverse();
+  }
+};
+function prism(F, poly, s0, s1) {
+  const m = mesh();
+  const ring0 = poly.map(([x, y]) => addV(m, [F.o[0] + F.a[0] * s0 + F.u[0] * x + F.v[0] * y, F.o[1] + F.a[1] * s0 + F.u[1] * x + F.v[1] * y, F.o[2] + F.a[2] * s0 + F.u[2] * x + F.v[2] * y]));
+  const ring1 = poly.map(([x, y]) => addV(m, [F.o[0] + F.a[0] * s1 + F.u[0] * x + F.v[0] * y, F.o[1] + F.a[1] * s1 + F.u[1] * x + F.v[1] * y, F.o[2] + F.a[2] * s1 + F.u[2] * x + F.v[2] * y]));
+  const n = poly.length;
+  m.f.push(ring0, ring1);
+  for (let i = 0; i < n; i++) m.f.push([ring0[i], ring0[(i + 1) % n], ring1[(i + 1) % n], ring1[i]]);
+  orient(m);
+  return m;
+}
+function openPrism(F, poly, s0, s1) {
+  const m = mesh();
+  const ring0 = poly.map(([x, y]) => addV(m, [F.o[0] + F.a[0] * s0 + F.u[0] * x + F.v[0] * y, F.o[1] + F.a[1] * s0 + F.u[1] * x + F.v[1] * y, F.o[2] + F.a[2] * s0 + F.u[2] * x + F.v[2] * y]));
+  const ring1 = poly.map(([x, y]) => addV(m, [F.o[0] + F.a[0] * s1 + F.u[0] * x + F.v[0] * y, F.o[1] + F.a[1] * s1 + F.u[1] * x + F.v[1] * y, F.o[2] + F.a[2] * s1 + F.u[2] * x + F.v[2] * y]));
+  const n = poly.length;
+  m.f.push(ring0);
+  for (let i = 0; i < n; i++) m.f.push([ring0[i], ring0[(i + 1) % n], ring1[(i + 1) % n], ring1[i]]);
+  orient(m);
+  return m;
+}
+function lathe(F, profile, segs = 16) {
+  const m = mesh();
+  const rings = profile.map(([s, r]) => {
+    if (r <= 1e-6) return { pole: addV(m, [F.o[0] + F.a[0] * s, F.o[1] + F.a[1] * s, F.o[2] + F.a[2] * s]) };
+    const ids = [];
+    for (let k = 0; k < segs; k++) ids.push(addV(m, pointOf(F, s, r, (k / segs) * TAU)));
+    return { ids };
+  });
+  for (let i = 0; i < rings.length - 1; i++) {
+    const a = rings[i], b = rings[i + 1];
+    for (let k = 0; k < segs; k++) {
+      const k2 = (k + 1) % segs;
+      if (a.pole !== undefined && b.ids) m.f.push([a.pole, b.ids[k2], b.ids[k]]);
+      else if (b.pole !== undefined && a.ids) m.f.push([a.ids[k], a.ids[k2], b.pole]);
+      else if (a.ids && b.ids) m.f.push([a.ids[k], a.ids[k2], b.ids[k2], b.ids[k]]);
+    }
+  }
+  orient(m);
+  return m;
+}
+const disc = (F, s0, s1, r, segs = 16) => lathe(F, [[s0, 0], [s0, r], [s1, r], [s1, 0]], segs);
+const wirePath = (points, color, width = 1, alpha = 1) => ({ kind: "wirePath", points, color, width, alpha });
+const gearPoly = ([cy, cz], r, teeth, spin, depth = 5) => {
+  const pts = [];
+  for (let k = 0; k < teeth * 2; k++) {
+    const a = spin + (k * Math.PI) / teeth;
+    const rr = r + (k % 2 === 0 ? depth : -depth * 0.85);
+    pts.push([cy + Math.cos(a) * rr, cz + Math.sin(a) * rr]);
+  }
+  return pts;
+};
+
+// ---------------- 13B helpers ----------------
+const FX = frameOf([0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1]);
+const FLOOR = frameOf([0, 0, 0], [0, 0, 1], [1, 0, 0], [0, 1, 0]);
+const at = (x, p) => [x, p[0], p[1]];
+const add = (parts, name, m, mat, extra = {}) => parts.push({ name, mesh: m, mat, ...extra });
+
+const INJ = [0, 1].map((ri) => {
+  const dir = [Math.cos(P.PORTS.intake), Math.sin(P.PORTS.intake)];
+  const x = ri === 0 ? 20 : -20;
+  const c = [dir[0] * P.PORTS.intakeR, dir[1] * P.PORTS.intakeR];
+  const nozzle = [x, c[0] + dir[0] * 30, c[1] + dir[1] * 30];
+  const target = [ri === 0 ? 60 : -60, c[0] - dir[0] * 8, c[1] - dir[1] * 8];
+  return { rotor: ri, chamber: ri === 0 ? P.selected : P.selectedRear, nozzle, target, back: [-dir[0], -dir[1]] };
+});
+const SPARK_POINTS = [];
+for (const ri of [0, 1]) {
+  const x = ri === 0 ? P.X.frontCenter : P.X.rearCenter;
+  for (const [which, v] of [["leading", P.PORTS.lead], ["trailing", P.PORTS.trail]]) {
+    const q = P.housingPoint(v);
+    SPARK_POINTS.push({ rotor: ri, which, tip: [x, q[0], q[1]] });
+  }
+}
+
+const housing2D = (n = 180) => Array.from({ length: n }, (_, i) => P.housingPoint((i / n) * TAU));
+const plateR = 138;
+
+// 2D rotor flank in the default/TDC local frame; used for the rotor solid.
+const rotorFlankLocal = (face, u) => {
+  const a = u * 120 * DEG;
+  const r = P.flankRadius(a);
+  const ang = face * 120 * DEG + a;
+  return [r * Math.cos(ang), r * Math.sin(ang)];
+};
+const OUTER_N = 204;
+const rotorOuterLocal = () => Array.from({ length: OUTER_N }, (_, i) => rotorFlankLocal(Math.floor(i / 68) % 3, (i % 68) / 68));
+// 51 internal ring-gear teeth: 4 points per tooth, matching the 204-point outer ring.
+const rotorInnerLocal = () => {
+  const pts = [];
+  const teeth = 51;
+  const step = TAU / teeth;
+  for (let k = 0; k < teeth; k++) {
+    const a0 = k * step;
+    pts.push([48 * Math.cos(a0), 48 * Math.sin(a0)]);
+    pts.push([42 * Math.cos(a0 + step * 0.22), 42 * Math.sin(a0 + step * 0.22)]);
+    pts.push([42 * Math.cos(a0 + step * 0.58), 42 * Math.sin(a0 + step * 0.58)]);
+    pts.push([48 * Math.cos(a0 + step * 0.8), 48 * Math.sin(a0 + step * 0.8)]);
+  }
+  return pts;
+};
+
+function rotorMesh(theta, ri, x0, x1) {
+  const [cx, cy] = P.rotorCenter(theta, ri);
+  const phi = P.rotorPhi(theta, ri);
+  const rot = (p) => [cx + p[0] * Math.cos(phi) - p[1] * Math.sin(phi), cy + p[0] * Math.sin(phi) + p[1] * Math.cos(phi)];
+  const outer = rotorOuterLocal().map(rot);
+  const inner = rotorInnerLocal().map(rot);
+  const m = mesh();
+  const o0 = outer.map((p) => addV(m, at(x0, p)));
+  const o1 = outer.map((p) => addV(m, at(x1, p)));
+  const i0 = inner.map((p) => addV(m, at(x0, p)));
+  const i1 = inner.map((p) => addV(m, at(x1, p)));
+  const n = OUTER_N;
+  for (let k = 0; k < n; k++) {
+    const k2 = (k + 1) % n;
+    m.f.push([o0[k], o0[k2], i0[k2], i0[k]]);
+    m.f.push([o1[k], o1[k2], i1[k2], i1[k]]);
+    m.f.push([o0[k], o0[k2], o1[k2], o1[k]]);
+    m.f.push([i0[k], i0[k2], i1[k2], i1[k]]);
+  }
+  return m;
+}
+
+function housingPort(theta, ri, outDir) {
+  // peripheral exhaust port slot on the rotor housing at 215°
+  const v = P.PORTS.exhaust;
+  const p = P.housingPoint(v);
+  const n = [Math.cos(v), Math.sin(v)];
+  const cx = ri === 0 ? P.X.frontCenter : P.X.rearCenter;
+  const a = at(cx, [p[0] - n[0] * 8, p[1] - n[1] * 8]);
+  const b = at(cx, [p[0] + n[0] * 26, p[1] + n[1] * 26]);
+  return { a, b, p: at(cx, p), n };
+}
+
+function buildStatic() {
+  const parts = [];
+  const wires = [];
+  const fuel = [];
+
+  // display stand
+  add(parts, "stand.base", disc(FLOOR, -190, -174, 238, 64), "plinth");
+  add(parts, "stand.pedestal", disc(FLOOR, -174, -138, 76, 32), "plinth");
+  wires.push(wirePath(Array.from({ length: 73 }, (_, i) => {
+    const a = (i / 72) * TAU; return [Math.cos(a) * 238, Math.sin(a) * 238, -189.5];
+  }), [180, 198, 214], 0.7, 0.24));
+
+  for (const ri of [0, 1]) {
+    const [x0, x1] = ri === 0 ? P.X.front : P.X.rear;
+    const cx = ri === 0 ? P.X.frontCenter : P.X.rearCenter;
+    // glass rotor housing (true epitrochoid)
+    const h = housing2D();
+    add(parts, `housing.${ri}`, ri === 0 ? openPrism(FX, h, x0, x1) : prism(FX, h, x0, x1), "housing");
+    wires.push(wirePath(h.map((q) => at(x1 + 0.4, q)).concat([at(x1 + 0.4, h[0])]), [168, 230, 252], 1.1, 0.34));
+    wires.push(wirePath(h.map((q) => at(x0 - 0.4, q)).concat([at(x0 - 0.4, h[0])]), [150, 206, 232], 0.8, 0.16));
+    // exhaust peripheral port and its boss
+    const port = housingPort(0, ri);
+    add(parts, `exhaust.port.${ri}`, prism(FX, [
+      [port.p[1] - 11, port.p[2] - 22], [port.p[1] + 11, port.p[2] - 22],
+      [port.p[1] + 11, port.p[2] + 22], [port.p[1] - 11, port.p[2] + 22],
+    ], x0 + 22, x1 - 22), "port");
+    const rim = [];
+    for (let k = 0; k <= 28; k++) {
+      const a = (k / 28) * TAU;
+      rim.push(at(cx, [port.p[1] + Math.cos(a) * 12, port.p[2] + Math.sin(a) * 12]));
+    }
+    wires.push(wirePath(rim, [255, 196, 128], 1.1, 0.55));
+    // two spark plugs per rotor; bodies in the housing top
+    for (const [which, v] of [["leading", P.PORTS.lead], ["trailing", P.PORTS.trail]]) {
+      const q = P.housingPoint(v);
+      const dir = [Math.cos(v), Math.sin(v)];
+      const base = at(cx, q);
+      const axis = [0, dir[0], dir[1]];
+      const f = frameAlong([base[0], base[1] + dir[0] * 6, base[2] + dir[1] * 6], axis);
+      add(parts, `plug.${ri}.${which}.body`, lathe(f, [[0, 0], [0, 6], [8, 6], [8, 8], [20, 8], [20, 5], [34, 5], [34, 3], [46, 3], [46, 0]], 12), "plugMetal");
+      add(parts, `plug.${ri}.${which}.cer`, lathe(f, [[20, 0], [20, 5], [23, 6], [34, 6], [38, 0]], 12), "plug");
+      add(parts, `plug.${ri}.${which}.boot`, lathe(f, [[34, 0], [34, 5], [46, 5], [46, 0]], 12), "coil");
+
+    }
+  }
+
+  // side plates: intermediate and end plates
+  for (const [x0, x1, name] of [[-20, 20, "mid"], [-122, -100, "rear"]]) {
+    add(parts, `plate.${name}`, disc(frameAlong([x0, 0, 0], [1, 0, 0]), 0, x1 - x0, plateR, 64), "plate");
+  }
+
+  // side intake windows, in the intermediate plate faces; one per rotor
+  for (const ri of [0, 1]) {
+    const x = ri === 0 ? 19.5 : -19.5;
+    const dir = [Math.cos(P.PORTS.intake), Math.sin(P.PORTS.intake)];
+    const c = [dir[0] * P.PORTS.intakeR, dir[1] * P.PORTS.intakeR];
+    const pts = [];
+    for (let k = 0; k < 8; k++) {
+      const a = (k / 8) * TAU;
+      pts.push([c[0] + Math.cos(a) * 24, c[1] + Math.sin(a) * 24]);
+    }
+    add(parts, `intake.window.${ri}`, prism(FX, pts, x - 0.8, x + 0.8), "intake");
+    wires.push(wirePath(pts.map((p) => at(x + 1.2, p)).concat([at(x + 1.2, pts[0])]), [136, 212, 246], 1.1, 0.5));
+    // short runner from the intake log to the window
+    const outer = [dir[0] * 150, dir[1] * 150];
+    const f = frameAlong([x, outer[0], outer[1]], [0, -dir[0], -dir[1]]);
+    add(parts, `intake.runner.${ri}`, lathe(f, [[0, 0], [0, 21], [64, 21], [64, 12], [78, 12], [78, 0]], 16), "intake");
+    // injector in the runner
+    add(parts, `injector.${ri}`, lathe(frameAlong([x, c[0] + dir[0] * 36, c[1] + dir[1] * 36], [0, -dir[0], -dir[1]]), [[0, 0], [0, 8], [16, 8], [16, 5], [22, 5], [22, 0]], 12), "fuel");
+    fuel.push(INJ[ri]);
+  }
+
+  // intake log and throttle body
+  add(parts, "intake.log", lathe(frameAlong([-46, 111, -111], [1, 0, 0]), [[0, 0], [0, 25], [92, 25], [92, 0]], 20), "intake");
+  add(parts, "throttle.body", lathe(frameAlong([0, 143, -143], [0, -0.707, 0.707]), [[0, 0], [0, 26], [26, 26], [36, 20], [36, 0]], 20), "intake");
+  add(parts, "throttle.plate", disc(frameAlong([0, 133, -133], [0, -0.707, 0.707]), 0, 3, 20, 20), "detail");
+
+  // exhaust collector and runners
+  add(parts, "exhaust.log", lathe(frameAlong([-80, -128, -90], [1, 0, 0]), [[0, 0], [0, 24], [160, 24], [160, 0]], 18), "exhaust");
+  for (const ri of [0, 1]) {
+    const cx = ri === 0 ? P.X.frontCenter : P.X.rearCenter;
+    const [x0, x1] = ri === 0 ? P.X.front : P.X.rear;
+    const port = housingPort(0, ri);
+    const dir = [Math.cos(P.PORTS.exhaust), Math.sin(P.PORTS.exhaust)];
+    const outer = [dir[0] * 158, dir[1] * 158];
+    const f = frameAlong([cx, port.p[1] + dir[0] * 12, port.p[2] + dir[1] * 12], [0, dir[0], dir[1]]);
+    add(parts, `exhaust.runner.${ri}`, lathe(f, [[0, 0], [0, 20], [46, 20], [46, 0]], 16), "exhaust");
+  }
+
+  // stationary gears (34 teeth) + supports at the front of each rotor
+  for (const ri of [0, 1]) {
+    const x = ri === 0 ? 94 : -94;
+    const spin = ri === 0 ? 0.04 : 0.12;
+    add(parts, `stationary.${ri}`, prism(FX, gearPoly([0, 0], 30, 34, spin, 4), x - 4, x + 4), "gear");
+    add(parts, `stationary.hub.${ri}`, disc(frameAlong([x, 0, 0], [1, 0, 0]), -5, 5, 10, 18), "gear");
+    if (ri === 0) add(parts, "front.gear.carrier", disc(frameAlong([84, 0, 0], [1, 0, 0]), 0, 6, 42, 36), "detail");
+
+  }
+
+  // small rotor housing coolant ribs / mount bosses
+  for (const ri of [0, 1]) {
+    const [x0, x1] = ri === 0 ? P.X.front : P.X.rear;
+    for (const a of [30, 90, 150, 210, 270, 330]) {
+      const p = P.housingPoint(a * DEG);
+      const r = Math.hypot(p[0], p[1]);
+      const boss = [p[0] / r, p[1] / r];
+      add(parts, `boss.${ri}.${a}`, disc(frameAlong([ri === 0 ? 60 : -60, p[0], p[1]], [0, boss[0], boss[1]]), 8, 22, 9, 8), "detail");
+    }
+  }
+
+  return { parts, wires, fuel, bores: [] };
+}
+
+function buildDynamic(theta) {
+  const parts = [];
+  const wires = [];
+
+  // eccentric shaft along x
+  const shaft = (x0, x1, r, mat = "shaft") => add(parts, `shaft.${x0}.${r}`, disc(frameAlong([x0, 0, 0], [1, 0, 0]), 0, x1 - x0, r, 24), mat);
+  shaft(-160, -122, 16);
+  shaft(-122, -98, 18);
+  shaft(-22, 22, 18);
+  shaft(98, 122, 18);
+  shaft(122, 158, 16);
+  // eccentric throws and webs at each rotor
+  for (const ri of [0, 1]) {
+    const cx = ri === 0 ? P.X.frontCenter : P.X.rearCenter;
+    const [ecx, ecy] = P.rotorCenter(theta, ri);
+    const x = ri === 0 ? 60 : -60;
+    add(parts, `throw.${ri}`, disc(frameAlong([x, ecx, ecy], [1, 0, 0]), -15, 15, 28, 24), "shaft");
+    // web from axis to eccentric
+    const poly = [];
+    for (let k = 0; k <= 18; k++) {
+      const a = (k / 18) * TAU;
+      poly.push([Math.cos(a) * 30, Math.sin(a) * 30]);
+    }
+    for (let k = 18; k >= 0; k--) {
+      const a = (k / 18) * TAU;
+      poly.push([ecx + Math.cos(a) * 24, ecy + Math.sin(a) * 24]);
+    }
+    add(parts, `web.${ri}`, prism(FX, poly, x - 9, x + 9), "shaft");
+    // a bright index mark on the throw
+    wires.push(wirePath([at(x + 15.5, [ecx, ecy]), at(x + 15.5, [ecx + 22 * Math.cos(theta * DEG), ecy + 22 * Math.sin(theta * DEG)])], [255, 224, 160], 2.2, 0.9));
+  }
+
+  // front pulley, rear flywheel
+  add(parts, "shaft.stub", lathe(frameAlong([100, 0, 0], [1, 0, 0]), [[0, 0], [0, 10], [10, 10], [10, 6], [14, 6], [14, 0]], 20), "shaft");
+  const flyX = -154;
+  add(parts, "flywheel.disc", disc(frameAlong([flyX, 0, 0], [1, 0, 0]), -10, 10, 95, 40), "flywheel");
+  add(parts, "output.flange", disc(frameAlong([flyX - 24, 0, 0], [1, 0, 0]), -5, 5, 34, 24), "flywheel");
+  for (let k = 0; k < 8; k++) {
+    const a = k * Math.PI / 4 + theta * DEG;
+    add(parts, `flywheel.bolt.${k}`, disc(frameAlong([flyX - 11.5, 72 * Math.cos(a), 72 * Math.sin(a)], [1, 0, 0]), 0, 1.6, 3.2, 8), "coil");
+  }
+  wires.push(wirePath([at(flyX - 12.2, [0, 0]), at(flyX - 12.2, [80 * Math.cos(theta * DEG), 80 * Math.sin(theta * DEG)])], [255, 226, 164], 1.4, 0.65));
+
+  // rotors, seals and face detail
+  for (const ri of [0, 1]) {
+    const [x0, x1] = ri === 0 ? P.X.front : P.X.rear;
+    const [cx, cy] = P.rotorCenter(theta, ri);
+    const phi = P.rotorPhi(theta, ri);
+    const rotor = rotorMesh(theta, ri, x0, x1);
+    add(parts, `rotor.${ri}`, rotor, "rotor", { noCull: true });
+    // apex seals
+    for (let k = 0; k < 3; k++) {
+      const a = phi + k * TAU / 3;
+      const y = cx + P.R * Math.cos(a), z = cy + P.R * Math.sin(a);
+      const tang = [-Math.sin(a), Math.cos(a)];
+      const rad = [Math.cos(a), Math.sin(a)];
+      const quad = [
+        [y - tang[0] * 4 - rad[0] * 2, z - tang[1] * 4 - rad[1] * 2],
+        [y + tang[0] * 4 - rad[0] * 2, z + tang[1] * 4 - rad[1] * 2],
+        [y + tang[0] * 4 + rad[0] * 2, z + tang[1] * 4 + rad[1] * 2],
+        [y - tang[0] * 4 + rad[0] * 2, z - tang[1] * 4 + rad[1] * 2],
+      ];
+      add(parts, `apex.${ri}.${k}`, prism(FX, quad, x0 + 0.3, x1 - 0.3), "seal");
+      // corner seal buttons
+      for (const s of [-1, 1]) add(parts, `corner.${ri}.${k}.${s}`, disc(frameAlong([s > 0 ? x1 - 2.5 : x0 + 2.5, y - rad[0] * 4, z - rad[1] * 4], [1, 0, 0]), 0, 2.4, 3.4, 8), "seal");
+    }
+    // crisp outer outline on the visible rotor face
+    {
+      const x = ri === 0 ? x1 + 0.35 : x0 - 0.35;
+      const local = rotorOuterLocal();
+      const pts = local.map((p) => {
+        const y = cx + p[0] * Math.cos(phi) - p[1] * Math.sin(phi);
+        const z = cy + p[0] * Math.sin(phi) + p[1] * Math.cos(phi);
+        return [x, y, z];
+      });
+      pts.push(pts[0]);
+      wires.push(wirePath(pts, [214, 224, 238], 1.3, 0.62));
+    }
+    // lightening holes on the outer face
+    for (let k = 0; k < 6; k++) {
+      const a = phi + k * TAU / 6 + 0.3;
+      const y = cx + 70 * Math.cos(a), z = cy + 70 * Math.sin(a);
+      const x = ri === 0 ? x1 - 0.6 : x0 + 0.6;
+      add(parts, `hole.${ri}.${k}`, disc(frameAlong([x, y, z], [1, 0, 0]), 0, 0.7, 5, 10), "coil");
+    }
+  }
+
+  return { parts, wires, chainPlates: [], chainDots: [] };
+}
+
+// ---------------- gas, ports, tags ----------------
+function chamberGas(theta, c) {
+  const pts = P.chamberPoly(theta, c);
+  return { pts, g: P.gasState(P.phaseOf(theta, c)), centroid: P.chamberCentroid(theta, c), c };
+}
+function flowPaths() {
+  const out = [];
+  for (const ri of [0, 1]) {
+    const dirI = [Math.cos(P.PORTS.intake), Math.sin(P.PORTS.intake)];
+    const dirE = [Math.cos(P.PORTS.exhaust), Math.sin(P.PORTS.exhaust)];
+    const x = ri === 0 ? 20 : -20;
+    const cx = ri === 0 ? 60 : -60;
+    const sel = ri === 0 ? P.selected : P.selectedRear;
+    const midI = P.chamberCentroid(sel.fire + 675, sel);
+    const midE = P.chamberCentroid(sel.fire + 375, sel);
+    const logI = [x, dirI[0] * 150, dirI[1] * 150];
+    const portI = [x, dirI[0] * P.PORTS.intakeR, dirI[1] * P.PORTS.intakeR];
+    out.push({ type: "intake", rotor: ri, chamber: sel, points: [logI, portI, [cx, midI[0], midI[1]]] });
+    const p = P.housingPoint(P.PORTS.exhaust);
+    const portE = [cx, p[0], p[1]];
+    const logE = [cx, dirE[0] * 155, dirE[1] * 155];
+    out.push({ type: "exhaust", rotor: ri, chamber: sel, points: [portE, logE, [cx, midE[0], midE[1]]] });
+  }
+  return out;
+}
+
+const TAG_CAM = (() => {
+  const A = 42 * DEG, E = 22 * DEG;
+  return {
+    R: [Math.sin(A), -Math.cos(A), 0],
+    U: [-Math.cos(A) * Math.sin(E), -Math.sin(A) * Math.sin(E), Math.cos(E)],
+    F: [Math.cos(A) * Math.cos(E), Math.sin(A) * Math.cos(E), Math.sin(E)],
+  };
+})();
+const TAG_C = [0, 0, 0];
+
+function rawTags(theta) {
+  const c = P.selected;
+  const psi = P.phaseOf(theta, c);
+  const g = P.gasState(psi);
+  const cen = P.chamberCentroid(theta, c);
+  const inj = INJ[0];
+  const on = P.sprayOn(psi);
+  return [
+    {
+      key: "stage1", kicker: "ROTOR 1 · A",
+      text: P.STAGES[g.phase === "overlap" ? "intake" : g.phase],
+      p: [c.x, cen[0], cen[1]], priority: 1, color: g.color,
+    },
+    {
+      key: "spray1", kicker: "ROTOR 1 · A",
+      text: on ? "SPRAY · ON" : "SPRAY · OFF",
+      p: inj.nozzle, priority: 1, on, color: on ? [255, 196, 90] : [140, 152, 166],
+    },
+  ];
+}
+
+let TAG_LABEL_POINTS = null;
+function ensureTagPoints() {
+  if (TAG_LABEL_POINTS) return TAG_LABEL_POINTS;
+  const { R, U, F } = TAG_CAM;
+  const C = [0, 0, 20];
+  const WING = 205;
+  const groups = { L: [], R: [] };
+  for (const t of rawTags(0)) {
+    const rel = [t.p[0] - C[0], t.p[1] - C[1], t.p[2] - C[2]];
+    const x = dot(R, rel), y = dot(U, rel);
+    (x < 0 ? groups.L : groups.R).push({ key: t.key, y });
+  }
+  const map = new Map();
+  for (const side of ["L", "R"]) {
+    const list = groups[side].sort((a, b) => b.y - a.y);
+    let prev = Infinity;
+    list.forEach((g, i) => {
+      const v = Math.min(g.y, prev - 64);
+      prev = v;
+      const u = side === "L" ? -WING : WING;
+      const d = ((i * 61 + (side === "L" ? -60 : 60)) % 160) - 80;
+      map.set(g.key, [
+        C[0] + R[0] * u + U[0] * v + F[0] * d,
+        C[1] + R[1] * u + U[1] * v + F[1] * d,
+        C[2] + R[2] * u + U[2] * v + F[2] * d,
+      ]);
+    });
+  }
+  TAG_LABEL_POINTS = map;
+  return map;
+}
+
+function tagAnchors(theta) {
+  const map = ensureTagPoints();
+  return rawTags(theta).map((t) => ({ ...t, l: map.get(t.key) || t.p }));
+}
+
+// rotary-viewer.js — canvas renderer and controls for the x-ray 13B rotary.
+(() => {
+  const stage = document.getElementById("stage");
+  const canvas = document.getElementById("view");
+  const ctx = canvas.getContext("2d");
+  const readout = document.querySelector("[data-readout]");
+  const rpmInput = document.getElementById("rpm");
+  const rpmValue = document.getElementById("rpmValue");
+  const playBtn = document.getElementById("play");
+  const chips = [...document.querySelectorAll("[data-chip]")];
+  const still = matchMedia("(prefers-reduced-motion: reduce)");
+
+  const DEG = Math.PI / 180;
+  const STATIC = buildStatic();
+  const FLOWS = flowPaths();
+  const edgesCache = new WeakMap();
+  const faceCache = new WeakMap();
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+
+  let yaw = 42 * DEG, pitch = 22 * DEG, zoom = 1.2;
+  let camAnim = null;
+  const viewTargets = {
+    front: { yaw: 42 * DEG, pitch: 22 * DEG, zoom: 1.2 },
+    rear: { yaw: 148 * DEG, pitch: 16 * DEG, zoom: 1.1 },
+    top: { yaw: 42 * DEG, pitch: 82 * DEG, zoom: 1.05 },
+  };
+  const goTo = (name) => {
+    const target = viewTargets[name];
+    if (!target) return;
+    camAnim = { y0: yaw, p0: pitch, z0: zoom, y1: target.yaw, p1: target.pitch, z1: target.zoom, t: 0 };
+    idleAt = performance.now() + 12000;
+  };
+  let theta = 90;
+  let rpm = Number(rpmInput.value) || 24;
+  let playing = !still.matches;
+  let last = 0;
+  let idleAt = performance.now() + 12000;
+  let w = 0, h = 0, dpr = 1;
+  const particles = [];
+
+  // ---------------- camera ----------------
+  const camera = () => {
+    const sa = Math.sin(yaw), ca = Math.cos(yaw);
+    const se = Math.sin(pitch), ce = Math.cos(pitch);
+    return {
+      R: [sa, -ca, 0],
+      U: [-ca * se, -sa * se, ce],
+      F: [ca * ce, sa * ce, se],
+    };
+  };
+  const dot = (a, p) => a[0] * p[0] + a[1] * p[1] + a[2] * p[2];
+  const C = [0, 0, 0];
+  const BB = [
+    [-188, -182, -200], [188, -182, -200], [-188, 182, -200], [188, 182, -200],
+    [-188, -182, 182], [188, -182, 182], [-188, 182, 182], [188, 182, 182],
+  ];
+  let view = { cam: null, s: 1, ox: 0, oy: 0 };
+  function fit() {
+    const cam = camera();
+    let minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9;
+    for (const p of BB) {
+      const q = [p[0] - C[0], p[1] - C[1], p[2] - C[2]];
+      const x = dot(cam.R, q), y = -dot(cam.U, q);
+      minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+      minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+    }
+    const compact = w < 900;
+    if (!compact) {
+      for (const t of tagAnchors(0)) {
+        const p = t.l;
+        const q = [p[0] - C[0], p[1] - C[1], p[2] - C[2]];
+        const x = dot(cam.R, q), y = -dot(cam.U, q);
+        minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+        minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+      }
+    }
+    const padX = compact ? 0 : 82, padY = compact ? 0 : 26;
+    const s = Math.min((w * (compact ? 0.94 : 0.98) - padX * 2) / (maxX - minX), (h * (compact ? 0.9 : 0.94) - padY * 2) / (maxY - minY)) * zoom;
+    view = { cam, s, ox: w / 2 - ((minX + maxX) / 2) * s, oy: h / 2 - ((minY + maxY) / 2) * s };
+  }
+  const proj = (p) => {
+    const q = [p[0] - C[0], p[1] - C[1], p[2] - C[2]];
+    return [view.ox + dot(view.cam.R, q) * view.s, view.oy - dot(view.cam.U, q) * view.s, dot(view.cam.F, q)];
+  };
+
+  // ---------------- mesh edges ----------------
+  function edgesOf(mesh) {
+    let e = edgesCache.get(mesh);
+    if (e) return e;
+    e = new Map();
+    mesh.f.forEach((face, fi) => {
+      for (let i = 0; i < face.length; i++) {
+        const a = face[i], b = face[(i + 1) % face.length];
+        const k = a < b ? `${a}|${b}` : `${b}|${a}`;
+        if (!e.has(k)) e.set(k, { a, b, faces: [] });
+        e.get(k).faces.push(fi);
+      }
+    });
+    e = [...e.values()];
+    edgesCache.set(mesh, e);
+    return e;
+  }
+  const normalOf = (mesh, face) => {
+    const [ia, ib, ic] = face;
+    const A = mesh.v[ia], B = mesh.v[ib], Cc = mesh.v[ic];
+    const u = [B[0] - A[0], B[1] - A[1], B[2] - A[2]];
+    const v = [Cc[0] - A[0], Cc[1] - A[1], Cc[2] - A[2]];
+    const n = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+    const l = Math.hypot(n[0], n[1], n[2]) || 1;
+    return [n[0] / l, n[1] / l, n[2] / l];
+  };
+
+  // ---------------- frame ----------------
+  const LIGHT = (() => { const l = [-0.38, -0.58, 0.72]; const n = Math.hypot(...l); return l.map((x) => x / n); })();
+  function drawPart(part) {
+    const mesh = part.mesh;
+    const mat = MAT[part.mat];
+    const cam = view.cam;
+    const s = view.s;
+    const faces = [];
+    const normals = mesh.f.map((face) => normalOf(mesh, face));
+    const vis = part.noCull ? normals.map(() => true) : normals.map((n) => dot(n, cam.F) > 0);
+    for (let i = 0; i < mesh.f.length; i++) {
+      if (!vis[i]) continue;
+      const face = mesh.f[i];
+      let depth = 0;
+      const pts = [];
+      for (const idx of face) {
+        const q = proj(mesh.v[idx]);
+        pts.push(q);
+        depth += q[2];
+      }
+      depth /= face.length;
+      const n = normals[i];
+      const nc = [dot(n, cam.R), dot(n, cam.U), dot(n, cam.F)];
+      const lam = Math.max(0, nc[0] * LIGHT[0] + nc[1] * LIGHT[1] + nc[2] * LIGHT[2]);
+      const shade = 0.3 + 0.7 * lam;
+      const c = mat.fill;
+      const r = Math.round(c[0] * shade), g = Math.round(c[1] * shade), b = Math.round(c[2] * shade);
+      faces.push({ pts, depth, fill: `rgba(${r},${g},${b},${mat.alpha})` });
+    }
+    const edgeBuckets = { sil: [], crease: [], hidden: [] };
+    for (const e of edgesOf(mesh)) {
+      const v0 = vis[e.faces[0]];
+      const v1 = e.faces.length > 1 ? vis[e.faces[1]] : false;
+      let kind;
+      if (v0 && v1) {
+        const n0 = normals[e.faces[0]], n1 = normals[e.faces[1]];
+        const d = n0[0] * n1[0] + n0[1] * n1[1] + n0[2] * n1[2];
+        const hard = ["rotor", "seal", "shaft", "gear", "flywheel", "plugMetal", "plug", "coil"].includes(part.mat);
+        if (d > (hard ? 0.62 : 0.93)) continue;
+        kind = "crease";
+      } else if (v0 || v1) kind = "sil";
+      else kind = "hidden";
+      const a = proj(mesh.v[e.a]), b = proj(mesh.v[e.b]);
+      edgeBuckets[kind].push([a[0], a[1], b[0], b[1]]);
+    }
+    return { faces, edgeBuckets, mat };
+  }
+
+  function buildFrame(theta) {
+    const dyn = buildDynamic(theta);
+    const draws = [];
+    const edges = { sil: new Map(), crease: new Map(), hidden: new Map() };
+    for (const part of [...STATIC.parts, ...dyn.parts]) {
+      const r = drawPart(part);
+      draws.push(...r.faces);
+      const ec = `rgba(${r.mat.edge[0]},${r.mat.edge[1]},${r.mat.edge[2]},`;
+      for (const kind of ["sil", "crease", "hidden"]) {
+        const key = `${ec}${(r.mat.edgeAlpha * (kind === "sil" ? 1 : kind === "crease" ? 0.4 : 0.1)).toFixed(2)})|${kind}`;
+        if (!edges[kind].has(key)) edges[kind].set(key, []);
+        edges[kind].get(key).push(...r.edgeBuckets[kind]);
+      }
+    }
+    // gas volumes: the true chamber between housing and rotor, extruded
+    for (const c of R13B.CHAMBERS) {
+      const { pts, g } = chamberGas(theta, c);
+      const xr = c.rotor === 0 ? [20, 100] : [-100, -20];
+      const a = pts.map((q) => proj([xr[0], q[0], q[1]]));
+      const b = pts.map((q) => proj([xr[1], q[0], q[1]]));
+      const za = a.reduce((s, q) => s + q[2], 0) / a.length;
+      const zb = b.reduce((s, q) => s + q[2], 0) / b.length;
+      const near = za >= zb ? a : b;
+      const far = za >= zb ? b : a;
+      const z = (za + zb) / 2;
+      const col = g.color;
+      draws.push({
+        gas: true, depth: z, near, far, alpha: g.alpha,
+        draw(ctx) {
+          const al = this.alpha;
+          // far cap
+          ctx.beginPath();
+          ctx.moveTo(this.far[0][0], this.far[0][1]);
+          for (let i = 1; i < this.far.length; i++) ctx.lineTo(this.far[i][0], this.far[i][1]);
+          ctx.closePath();
+          ctx.fillStyle = `rgba(${col[0]},${col[1]},${col[2]},${al * 0.26})`;
+          ctx.fill();
+          // side walls
+          ctx.fillStyle = `rgba(${col[0]},${col[1]},${col[2]},${al * 0.18})`;
+          for (let i = 0; i < this.near.length - 1; i++) {
+            const q = [this.far[i], this.far[i + 1], this.near[i + 1], this.near[i]];
+            ctx.beginPath();
+            ctx.moveTo(q[0][0], q[0][1]);
+            for (let k = 1; k < 4; k++) ctx.lineTo(q[k][0], q[k][1]);
+            ctx.closePath(); ctx.fill();
+          }
+          // near cap, brighter
+          const cx = this.near.reduce((s, q) => s + q[0], 0) / this.near.length;
+          const cy = this.near.reduce((s, q) => s + q[1], 0) / this.near.length;
+          const gr = ctx.createRadialGradient(cx, cy, 0, cx, cy, 80 * view.s);
+          gr.addColorStop(0, `rgba(${Math.min(255, col[0] * 1.12) | 0},${Math.min(255, col[1] * 1.08) | 0},${Math.min(255, col[2] * 1.05) | 0},${Math.min(0.5, al * 0.85)})`);
+          gr.addColorStop(1, `rgba(${col[0]},${col[1]},${col[2]},${al * 0.45})`);
+          ctx.beginPath();
+          ctx.moveTo(this.near[0][0], this.near[0][1]);
+          for (let i = 1; i < this.near.length; i++) ctx.lineTo(this.near[i][0], this.near[i][1]);
+          ctx.closePath();
+          ctx.fillStyle = gr;
+          ctx.fill();
+          ctx.strokeStyle = `rgba(${col[0]},${col[1]},${col[2]},0.55)`;
+          ctx.lineWidth = 0.9; ctx.stroke();
+        },
+      });
+    }
+    return { draws, edges, dyn };
+  }
+
+  // ---------------- render ----------------
+  function drawBoreWire(w) {
+    const cam = view.cam;
+    const a = w.axis;
+    const u = Math.abs(a[2]) > 0.9 ? [1, 0, 0] : [0, 0, 1];
+    let uu = [u[1] * a[2] - u[2] * a[1], u[2] * a[0] - u[0] * a[2], u[0] * a[1] - u[1] * a[0]];
+    const ul = Math.hypot(...uu); uu = uu.map((v) => v / ul);
+    const vv = [a[1] * uu[2] - a[2] * uu[1], a[2] * uu[0] - a[0] * uu[2], a[0] * uu[1] - a[1] * uu[0]];
+    // faint glass casing
+    const hull = [];
+    for (let k = 0; k < 24; k++) {
+      const ang = (k / 24) * Math.PI * 2;
+      const p = [w.o[0] + a[0] * w.s0 + w.r * (Math.cos(ang) * uu[0] + Math.sin(ang) * vv[0]), w.o[1] + a[1] * w.s0 + w.r * (Math.cos(ang) * uu[1] + Math.sin(ang) * vv[1]), w.o[2] + a[2] * w.s0 + w.r * (Math.cos(ang) * uu[2] + Math.sin(ang) * vv[2])];
+      hull.push(proj(p));
+      const q = [w.o[0] + a[0] * w.s1 + w.r * (Math.cos(ang) * uu[0] + Math.sin(ang) * vv[0]), w.o[1] + a[1] * w.s1 + w.r * (Math.cos(ang) * uu[1] + Math.sin(ang) * vv[1]), w.o[2] + a[2] * w.s1 + w.r * (Math.cos(ang) * uu[2] + Math.sin(ang) * vv[2])];
+      hull.push(proj(q));
+    }
+    const bh = hull2(hull.map((p) => [p[0], p[1]]));
+    ctx.beginPath();
+    ctx.moveTo(bh[0][0], bh[0][1]);
+    for (let i = 1; i < bh.length; i++) ctx.lineTo(bh[i][0], bh[i][1]);
+    ctx.closePath();
+    ctx.fillStyle = "rgba(190,225,255,0.025)";
+    ctx.fill();
+    // only a deck rim and faint side generators: the solid piston carries the eye
+    ctx.strokeStyle = "rgba(238,248,255,0.32)";
+    ctx.lineWidth = 0.8;
+    for (const [s, r] of [[w.s1, w.r + 2.2]]) {
+      ctx.beginPath();
+      for (let k = 0; k <= 48; k++) {
+        const ang = (k / 48) * Math.PI * 2;
+        const p = [w.o[0] + a[0] * s + r * (Math.cos(ang) * uu[0] + Math.sin(ang) * vv[0]), w.o[1] + a[1] * s + r * (Math.cos(ang) * uu[1] + Math.sin(ang) * vv[1]), w.o[2] + a[2] * s + r * (Math.cos(ang) * uu[2] + Math.sin(ang) * vv[2])];
+        const q = proj(p);
+        k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]);
+      }
+      ctx.stroke();
+    }
+    // silhouette generators
+    const du = dot(uu, cam.F), dv = dot(vv, cam.F);
+    const th = Math.atan2(-du, dv);
+    for (const ang of [th, th + Math.PI]) {
+      const p0 = [w.o[0] + a[0] * w.s0 + w.r * (Math.cos(ang) * uu[0] + Math.sin(ang) * vv[0]), w.o[1] + a[1] * w.s0 + w.r * (Math.cos(ang) * uu[1] + Math.sin(ang) * vv[1]), w.o[2] + a[2] * w.s0 + w.r * (Math.cos(ang) * uu[2] + Math.sin(ang) * vv[2])];
+      const p1 = [w.o[0] + a[0] * w.s1 + w.r * (Math.cos(ang) * uu[0] + Math.sin(ang) * vv[0]), w.o[1] + a[1] * w.s1 + w.r * (Math.cos(ang) * uu[1] + Math.sin(ang) * vv[1]), w.o[2] + a[2] * w.s1 + w.r * (Math.cos(ang) * uu[2] + Math.sin(ang) * vv[2])];
+      const q0 = proj(p0), q1 = proj(p1);
+      ctx.beginPath(); ctx.moveTo(q0[0], q0[1]); ctx.lineTo(q1[0], q1[1]); ctx.stroke();
+    }
+  }
+
+  // ---------------- volumetric intake / exhaust flow ----------------
+  const unit3 = (a) => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; };
+  const cross3 = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  function densify(points, parts = 4) {
+    const out = [];
+    for (let i = 0; i < points.length - 1; i++) {
+      for (let j = 0; j < parts; j++) {
+        const t = j / parts;
+        out.push([0, 1, 2].map((k) => points[i][k] + (points[i + 1][k] - points[i][k]) * t));
+      }
+    }
+    out.push(points[points.length - 1]);
+    return out;
+  }
+  function normalPair(t) {
+    const up = Math.abs(t[2]) > 0.9 ? [1, 0, 0] : [0, 0, 1];
+    const a = unit3(cross3(t, up));
+    const b = unit3(cross3(t, a));
+    return [a, b];
+  }
+  function drawFlows(deg, now) {
+    const time = now / 1000;
+    const active = [];
+    for (const fl of FLOWS) {
+      const psi = R13B.phaseOf(deg, fl.chamber);
+      const strength = clamp(R13B.portPulse(psi, fl.type), 0, 1);
+      if (strength < 0.03) continue;
+      active.push({ fl, strength });
+    }
+    if (!active.length) return;
+    ctx.save();
+    ctx.globalCompositeOperation = "source-over";
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    for (const { fl, strength } of active) {
+      const blue = fl.type === "intake";
+      const col = blue ? [82, 178, 255] : [255, 152, 64];
+      const pts3 = densify(fl.points, 5);
+      const screen = pts3.map((p) => proj(p));
+      const tangents = pts3.map((p, i) => {
+        const a = pts3[Math.max(0, i - 1)], b = pts3[Math.min(pts3.length - 1, i + 1)];
+        return unit3([b[0] - a[0], b[1] - a[1], b[2] - a[2]]);
+      });
+      // a volumetric ribbon: wide at the open end, narrow at the valve
+      const wide = fl.type === "intake" ? 19 : 8;
+      const narrow = fl.type === "intake" ? 7 : 16;
+      const leftEdge = [], rightEdge = [];
+      screen.forEach((p, i) => {
+        const q = screen[Math.min(screen.length - 1, i + 1)];
+        const r = screen[Math.max(0, i - 1)];
+        let tx = q[0] - r[0], ty = q[1] - r[1];
+        const len = Math.hypot(tx, ty) || 1;
+        tx /= len; ty /= len;
+        const w = (wide + (narrow - wide) * (i / (screen.length - 1))) * Math.max(0.35, strength);
+        leftEdge.push([p[0] - ty * w, p[1] + tx * w]);
+        rightEdge.push([p[0] + ty * w, p[1] - tx * w]);
+      });
+      const gr = ctx.createLinearGradient(screen[0][0], screen[0][1], screen[screen.length - 1][0], screen[screen.length - 1][1]);
+      const a0 = 0.45 * strength, a1 = 0.16 * strength;
+      gr.addColorStop(0, `rgba(${col.join(",")},${a0})`);
+      gr.addColorStop(0.55, `rgba(${col.join(",")},${a0 * 0.85})`);
+      gr.addColorStop(1, `rgba(${col.join(",")},${a1})`);
+      ctx.beginPath();
+      leftEdge.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])));
+      for (let i = rightEdge.length - 1; i >= 0; i--) ctx.lineTo(rightEdge[i][0], rightEdge[i][1]);
+      ctx.closePath();
+      ctx.fillStyle = gr;
+      ctx.fill();
+      // bright core and a halo
+      ctx.globalCompositeOperation = "lighter";
+      for (const [width, alpha] of [[12, 0.05], [6, 0.09], [2.6, 0.2], [1.0, 0.42]]) {
+        ctx.strokeStyle = `rgba(${col.join(",")},${alpha * strength})`;
+        ctx.lineWidth = width;
+        ctx.beginPath();
+        screen.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])));
+        ctx.stroke();
+      }
+      // three swirling filaments, each a real offset path around the core
+      for (let j = 0; j < 3; j++) {
+        const phase = j * 2.1 + fl.rotor * 2.1 + time * (blue ? 1.6 : 1.2);
+        ctx.strokeStyle = `rgba(${col.map((c) => Math.min(255, c * (1.05 + j * 0.06)) | 0).join(",")},${(0.34 - j * 0.06) * strength})`;
+        ctx.lineWidth = 3.0 - j * 0.55;
+        ctx.beginPath();
+        pts3.forEach((p, i) => {
+          const [a, b] = normalPair(tangents[i]);
+          const off = 5.5;
+          const dx = Math.sin(phase + i * 0.7 + j) * off;
+          const dy = Math.cos(phase * 0.8 + i * 0.5 + j) * off * 0.8;
+          const q = proj([p[0] + a[0] * dx + b[0] * dy, p[1] + a[1] * dx + b[1] * dy, p[2] + a[2] * dx + b[2] * dy]);
+          i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]);
+        });
+        ctx.stroke();
+      }
+      // moving dashes show direction
+      ctx.setLineDash([5, 10]);
+      ctx.lineDashOffset = -(time * (34 + rpm * 0.4) + fl.rotor * 21);
+      ctx.strokeStyle = `rgba(${col.join(",")},${0.42 * strength})`;
+      ctx.lineWidth = 1.7;
+      ctx.beginPath();
+      screen.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])));
+      ctx.stroke();
+      ctx.setLineDash([]);
+      // a glow at the valve seat where the charge is crossing
+      const vp = proj(blue ? pts3[pts3.length - 2] : pts3[1]);
+      const vg = ctx.createRadialGradient(vp[0], vp[1], 0, vp[0], vp[1], 22 * view.s);
+      vg.addColorStop(0, `rgba(${col.join(",")},${0.3 * strength})`);
+      vg.addColorStop(1, `rgba(${col.join(",")},0)`);
+      ctx.fillStyle = vg;
+      ctx.beginPath(); ctx.arc(vp[0], vp[1], 22 * view.s, 0, Math.PI * 2); ctx.fill();
+      // puffs at the open end: mist at the stack mouth, smoke at the exhaust outlet
+      const atStart = blue;
+      const base = atStart ? pts3[0] : pts3[pts3.length - 1];
+      const dir = atStart ? tangents[0] : tangents[tangents.length - 1];
+      const drift = blue ? -1 : 1;
+      for (let i = 0; i < (blue ? 4 : 7); i++) {
+        const ph = (time * (blue ? 0.7 : 0.55) + i / (blue ? 4 : 7) + fl.rotor * 0.37) % 1;
+        const radius = (blue ? 8 + ph * 14 : 12 + ph * 46) * view.s;
+        const p = proj([
+          base[0] + dir[0] * drift * ph * (blue ? 12 : 46),
+          base[1] + dir[1] * drift * ph * (blue ? 12 : 46),
+          base[2] + dir[2] * drift * ph * (blue ? 12 : 46),
+        ]);
+        const g = ctx.createRadialGradient(p[0], p[1], 0, p[0], p[1], Math.max(5, radius));
+        const a = (1 - ph) * (blue ? 0.22 : 0.3) * strength;
+        g.addColorStop(0, `rgba(${col.join(",")},${a})`);
+        g.addColorStop(1, `rgba(${col.join(",")},0)`);
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(p[0], p[1], Math.max(4, radius), 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+
+  // ---------------- petrol injection spray ----------------
+  const fuelDrops = [];
+  const fuelAcc = new Map();
+  const SUB = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+  const DOT = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  function drawFuel(deg, dt, now) {
+    const time = now / 1000;
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    for (const f of STATIC.fuel) {
+      const psi = R13B.phaseOf(deg, f.chamber);
+      let inten = R13B.sprayStrength(psi);
+      if (inten < 0.04) continue;
+      const a = proj(f.nozzle), b = proj(f.target);
+      const dx = b[0] - a[0], dy = b[1] - a[1];
+      const len = Math.hypot(dx, dy) || 1;
+      const nx = -dy / len, ny = dx / len;
+      const wt = 14 * view.s * (0.55 + 0.45 * inten);
+      for (const k of [-0.7, 0, 0.7]) {
+        const gr = ctx.createLinearGradient(a[0], a[1], b[0], b[1]);
+        gr.addColorStop(0, `rgba(255,204,96,${0.12 * inten})`);
+        gr.addColorStop(0.55, `rgba(250,178,64,${0.06 * inten})`);
+        gr.addColorStop(1, "rgba(255,170,60,0)");
+        ctx.fillStyle = gr;
+        ctx.beginPath();
+        ctx.moveTo(a[0] + nx * k * 2, a[1] + ny * k * 2);
+        ctx.lineTo(b[0] + nx * (k * 0.5 + 1) * wt, b[1] + ny * (k * 0.5 + 1) * wt);
+        ctx.lineTo(b[0] + nx * (k * 0.5 - 1) * wt, b[1] + ny * (k * 0.5 - 1) * wt);
+        ctx.closePath();
+        ctx.fill();
+      }
+      // atomising mist at the nozzle
+      const ng = ctx.createRadialGradient(a[0], a[1], 0, a[0], a[1], 7 * view.s);
+      ng.addColorStop(0, `rgba(255,208,120,${0.3 * inten})`);
+      ng.addColorStop(1, "rgba(255,180,70,0)");
+      ctx.fillStyle = ng;
+      ctx.beginPath(); ctx.arc(a[0], a[1], 7 * view.s, 0, Math.PI * 2); ctx.fill();
+      if (dt > 0) {
+        const acc = (fuelAcc.get(f.rotor) ?? 0) + dt * 150 * inten;
+        const k = Math.floor(acc);
+        fuelAcc.set(f.rotor, acc - k);
+        for (let i = 0; i < k && fuelDrops.length < 360; i++) {
+          fuelDrops.push({ f, t: 0, speed: 1.4 + Math.random() * 1.3, angle: Math.random() * Math.PI * 2, amp: 0.7 + Math.random() * 1.3, size: 1.1 + Math.random() * 1.8 });
+        }
+      }
+    }
+    const d0 = [0, 0, 0];
+    for (let i = fuelDrops.length - 1; i >= 0; i--) {
+      const d = fuelDrops[i];
+      d.t += dt * d.speed;
+      if (d.t >= 1) { fuelDrops.splice(i, 1); continue; }
+      const A = d.f.nozzle, B = d.f.target;
+      const dir = SUB(B, A);
+      const l = Math.hypot(...dir) || 1;
+      const u = [dir[0] / l, dir[1] / l, dir[2] / l];
+      const up = Math.abs(u[2]) > 0.9 ? [1, 0, 0] : [0, 0, 1];
+      const p1 = unit3(cross3(u, up));
+      const p2 = unit3(cross3(u, p1));
+      const spread = (1.4 + 12 * d.t) * d.amp;
+      const ca = Math.cos(d.angle + time * 0.8), sa = Math.sin(d.angle + time * 0.8);
+      const p3 = [
+        A[0] + dir[0] * d.t + (p1[0] * ca + p2[0] * sa) * spread,
+        A[1] + dir[1] * d.t + (p1[1] * ca + p2[1] * sa) * spread,
+        A[2] + dir[2] * d.t + (p1[2] * ca + p2[2] * sa) * spread,
+      ];
+      const q = proj(p3);
+      const rad = Math.max(0.8, d.size * 2.2);
+      const g = ctx.createRadialGradient(q[0], q[1], 0, q[0], q[1], rad * 2.1);
+      const al = (1 - d.t) * 0.55;
+      g.addColorStop(0, `rgba(255,220,150,${al})`);
+      g.addColorStop(0.3, `rgba(255,196,96,${al * 0.7})`);
+      g.addColorStop(1, "rgba(255,160,50,0)");
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(q[0], q[1], rad * 2.1, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  let frame = 0;
+  function render(now) {
+    const dt = last ? Math.min((now - last) / 1000, 0.05) : 0.016;
+    last = now;
+    if (playing) theta += rpm * 6 * dt;
+    if (camAnim) {
+      camAnim.t += dt / 0.7;
+      const k = Math.min(1, camAnim.t);
+      const e = k * k * (3 - 2 * k);
+      yaw = camAnim.y0 + (camAnim.y1 - camAnim.y0) * e;
+      pitch = camAnim.p0 + (camAnim.p1 - camAnim.p0) * e;
+      zoom = camAnim.z0 + (camAnim.z1 - camAnim.z0) * e;
+      if (k >= 1) camAnim = null;
+    } else if (!still.matches && !dragging && now > idleAt) yaw += 0.06 * dt;
+    const deg = ((theta % 1080) + 1080) % 1080;
+    const fire = R13B.firingChamber(deg);
+    if (playing) updateParticles(dt, deg);
+
+    // background
+    const bg = ctx.createRadialGradient(w / 2, h * 0.42, 40, w / 2, h * 0.42, Math.max(w, h) * 0.7);
+    bg.addColorStop(0, "#141821");
+    bg.addColorStop(1, "#07080b");
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, w, h);
+
+    fit();
+    const { draws, edges, dyn } = buildFrame(deg);
+    // ground shadow
+    const sh = proj([0, 0, -188]);
+    const shg = ctx.createRadialGradient(sh[0], sh[1], 10, sh[0], sh[1], 270 * view.s);
+    shg.addColorStop(0, "rgba(0,0,0,0.5)");
+    shg.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.save();
+    ctx.translate(sh[0], sh[1]);
+    ctx.scale(1, 0.34);
+    ctx.fillStyle = shg;
+    ctx.beginPath(); ctx.arc(0, 0, 270 * view.s, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+
+    draws.sort((a, b) => a.depth - b.depth);
+    for (const d of draws) {
+      if (d.gas) { d.draw(ctx); continue; }
+      ctx.beginPath();
+      ctx.moveTo(d.pts[0][0], d.pts[0][1]);
+      for (let i = 1; i < d.pts.length; i++) ctx.lineTo(d.pts[i][0], d.pts[i][1]);
+      ctx.closePath();
+      ctx.fillStyle = d.fill;
+      ctx.fill();
+    }
+    // edges, faint first
+    for (const kind of ["hidden", "crease", "sil"]) {
+      for (const [key, segs] of edges[kind]) {
+        const color = key.split("|")[0];
+        ctx.strokeStyle = color;
+        ctx.lineWidth = kind === "sil" ? 0.9 : 0.55;
+        ctx.beginPath();
+        for (const [x0, y0, x1, y1] of segs) { ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); }
+        ctx.stroke();
+      }
+    }
+    // bores and static wires
+    for (const wv of STATIC.wires) {
+      if (wv.kind === "wireCylinder") drawBoreWire({ o: wv.o, axis: wv.axis, r: wv.r, s0: wv.s0, s1: wv.s1 });
+      else if (wv.kind === "wirePath") {
+        ctx.strokeStyle = `rgba(${wv.color.join(",")},${wv.alpha})`;
+        ctx.lineWidth = wv.width;
+        ctx.beginPath();
+        wv.points.forEach((p, i) => { const q = proj(p); i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); });
+        ctx.stroke();
+      }
+    }
+    for (const wv of dyn.wires) {
+      ctx.strokeStyle = `rgba(${wv.color.join(",")},${wv.alpha})`;
+      ctx.lineWidth = wv.width;
+      ctx.beginPath();
+      wv.points.forEach((p, i) => { const q = proj(p); i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); });
+      ctx.stroke();
+    }
+    // timing chains: link plates and rollers
+    const plates = dyn.chainPlates.map((p) => {
+      let depth = 0;
+      const pts = p.pts.map((q) => { const s = proj(q); depth += s[2]; return s; });
+      return { ...p, pts, depth: depth / pts.length };
+    }).sort((a, b) => a.depth - b.depth);
+    for (const p of plates) {
+      ctx.beginPath();
+      ctx.moveTo(p.pts[0][0], p.pts[0][1]);
+      for (let i = 1; i < p.pts.length; i++) ctx.lineTo(p.pts[i][0], p.pts[i][1]);
+      ctx.closePath();
+      ctx.fillStyle = `rgba(${p.fill.join(",")},${p.alpha})`;
+      ctx.fill();
+      ctx.strokeStyle = `rgba(${p.edge.join(",")},0.35)`;
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+    }
+    for (const dot of dyn.chainDots) {
+      const q = proj(dot.p);
+      ctx.beginPath();
+      ctx.arc(q[0], q[1], Math.max(1.1, dot.r * view.s), 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${dot.color.join(",")},${dot.alpha})`;
+      ctx.fill();
+    }
+    drawFlows(deg, now);
+    drawFuel(deg, playing ? dt : 0, now);
+    // particles
+    ctx.globalCompositeOperation = "lighter";
+    for (const p of particles) {
+      const q = proj(p.pos);
+      const c = p.type === "intake" ? "64,170,255" : "255,140,45";
+      const g = ctx.createRadialGradient(q[0], q[1], 0, q[0], q[1], p.size * 2.4);
+      g.addColorStop(0, `rgba(${c},${p.alpha})`);
+      g.addColorStop(1, `rgba(${c},0)`);
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(q[0], q[1], p.size * 2.4, 0, Math.PI * 2); ctx.fill();
+    }
+    // ignition: leading and trailing plugs, then the chamber fire
+    for (const c of R13B.CHAMBERS) {
+      const psi = R13B.phaseOf(deg, c);
+      if (psi > 42) continue;
+      const cen = R13B.chamberCentroid(deg, c);
+      const c0 = proj([c.x, cen[0], cen[1]]);
+      const f = psi < 6 ? 1 : 1 - (psi - 6) / 36;
+      const R = (44 + 52 * (1 - f)) * view.s;
+      const g = ctx.createRadialGradient(c0[0], c0[1], 0, c0[0], c0[1], R);
+      g.addColorStop(0, `rgba(255,252,240,${0.95 * f})`);
+      g.addColorStop(0.12, `rgba(255,236,170,${0.9 * f})`);
+      g.addColorStop(0.32, `rgba(255,160,64,${0.7 * f})`);
+      g.addColorStop(0.62, `rgba(255,78,40,${0.36 * f})`);
+      g.addColorStop(1, "rgba(255,60,20,0)");
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(c0[0], c0[1], R, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = `rgba(255,220,160,${0.4 * f})`;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.arc(c0[0], c0[1], R * (0.55 + 0.5 * (1 - f)), 0, Math.PI * 2); ctx.stroke();
+    }
+    // plug sparks
+    for (const sp of SPARK_POINTS) {
+      const c = R13B.CHAMBERS.find((q) => q.rotor === sp.rotor);
+      const psi = R13B.phaseOf(deg, c);
+      const s = sp.which === "leading" ? psi : psi - 12;
+      if (s < 0 || s > 10) continue;
+      const a = 1 - s / 10;
+      const q = proj(sp.tip);
+      const g2 = ctx.createRadialGradient(q[0], q[1], 0, q[0], q[1], 9 * view.s);
+      g2.addColorStop(0, `rgba(235,250,255,${0.95 * a})`);
+      g2.addColorStop(0.38, `rgba(150,215,255,${0.55 * a})`);
+      g2.addColorStop(1, "rgba(90,170,255,0)");
+      ctx.fillStyle = g2;
+      ctx.beginPath(); ctx.arc(q[0], q[1], 9 * view.s, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = `rgba(240,252,255,${0.9 * a})`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(q[0] - 5, q[1]); ctx.lineTo(q[0] + 5, q[1]);
+      ctx.moveTo(q[0], q[1] - 5); ctx.lineTo(q[0], q[1] + 5);
+      ctx.stroke();
+    }
+    ctx.globalCompositeOperation = "source-over";
+
+    drawTags(deg);
+
+    // readout and chips
+    const injecting = STATIC.fuel.some((f) => R13B.sprayOn(R13B.phaseOf(deg, f.chamber)));
+    const text = `ecc ${Math.round(deg)}° · rotor ${Math.round(deg / 3)}° · ${fire.label} firing${injecting ? " · petrol" : ""}`;
+    if (readout.textContent !== text) readout.textContent = text;
+    for (const chip of chips) {
+      const idx = Number(chip.dataset.chip);
+      const c = R13B.CHAMBERS[idx];
+      const g = R13B.gasState(R13B.phaseOf(deg, c));
+      chip.style.setProperty("--gas", `rgb(${g.color[0]},${g.color[1]},${g.color[2]})`);
+      chip.style.setProperty("--gasA", String(clamp(g.alpha * 2, 0.25, 0.95)));
+      chip.classList.toggle("fire", fire.i === idx);
+    }
+    frame = requestAnimationFrame(render);
+  }
+
+  // ---------------- part name tags (fixed in 3D, billboarded) ----------------
+  // Each plate is centered on a fixed 3D label point. The whole plate turns
+  // with the model; only the far end of its leader tracks a moving part.
+  function drawTags(deg) {
+    const compact = w < 900;
+    const font = `600 ${compact ? 8.5 : 9}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+    const kickFont = `600 ${compact ? 7 : 7.5}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+    const H = compact ? 16 : 18;
+    const HC = compact ? 28 : 30;
+    const tags = tagAnchors(deg).filter((t) => !compact || t.priority === 1);
+    ctx.save();
+    const LC = [0, 0, 20];
+    const A0 = 42 * DEG, E0 = 22 * DEG;
+    const R0 = [Math.sin(A0), -Math.cos(A0), 0];
+    const U0 = [-Math.cos(A0) * Math.sin(E0), -Math.sin(A0) * Math.sin(E0), Math.cos(E0)];
+    const F0 = [Math.cos(A0) * Math.cos(E0), Math.sin(A0) * Math.cos(E0), Math.sin(E0)];
+    const compactLabel = (p) => {
+      if (!compact) return p;
+      const rel = [p[0] - LC[0], p[1] - LC[1], p[2] - LC[2]];
+      const u = dot(R0, rel), v = dot(U0, rel), d = dot(F0, rel);
+      return [LC[0] + R0[0] * u * 0.5 + U0[0] * v * 1.5 + F0[0] * d * 0.35,
+              LC[1] + R0[1] * u * 0.5 + U0[1] * v * 1.5 + F0[1] * d * 0.35,
+              LC[2] + R0[2] * u * 0.5 + U0[2] * v * 1.5 + F0[2] * d * 0.35];
+    };
+    for (const t of tags) {
+      const lp = compactLabel(t.l);
+      const q = proj(lp);
+      const e = proj(t.p);
+      t.q = q; t.e = e;
+      const card = t.key === "stage1" || t.key === "spray1";
+      t.card = card;
+      t.label = compact && t.short ? t.short : t.text;
+      ctx.font = font;
+      t.lw = card ? (compact ? 116 : 132) : ctx.measureText(t.label).width + 14;
+      t.h = card ? HC : H;
+      // leader starts on the plate edge nearest the part
+      const dx = e[0] - q[0], dy = e[1] - q[1];
+      const adx = Math.abs(dx), ady = Math.abs(dy);
+      const kx = adx > 1e-3 ? (t.lw / 2) / adx : Infinity;
+      const ky = ady > 1e-3 ? (t.h / 2) / ady : Infinity;
+      t.inside = adx < t.lw / 2 && ady < t.h / 2;
+      t.lineStart = [q[0] + dx * Math.min(kx, ky), q[1] + dy * Math.min(kx, ky)];
+    }
+    // leaders and anchor dots
+    for (const t of tags) {
+      if (t.inside) continue;
+      const col = t.color || null;
+      const line = col ? `rgba(${col[0]},${col[1]},${col[2]},0.82)` : "rgba(184,201,217,0.58)";
+      if (col) {
+        ctx.strokeStyle = `rgba(${col[0]},${col[1]},${col[2]},0.12)`;
+        ctx.lineWidth = 4.4;
+        ctx.beginPath(); ctx.moveTo(t.lineStart[0], t.lineStart[1]); ctx.lineTo(t.e[0], t.e[1]); ctx.stroke();
+      }
+      ctx.strokeStyle = "rgba(5,7,10,0.62)"; ctx.lineWidth = 2.6;
+      ctx.beginPath(); ctx.moveTo(t.lineStart[0], t.lineStart[1]); ctx.lineTo(t.e[0], t.e[1]); ctx.stroke();
+      ctx.strokeStyle = line; ctx.lineWidth = 0.9;
+      ctx.beginPath(); ctx.moveTo(t.lineStart[0], t.lineStart[1]); ctx.lineTo(t.e[0], t.e[1]); ctx.stroke();
+      ctx.beginPath(); ctx.arc(t.e[0], t.e[1], 4.6, 0, Math.PI * 2);
+      ctx.strokeStyle = col ? `rgba(${col[0]},${col[1]},${col[2]},0.4)` : "rgba(210,226,240,0.3)";
+      ctx.lineWidth = 0.8; ctx.stroke();
+      ctx.beginPath(); ctx.arc(t.e[0], t.e[1], 2.2, 0, Math.PI * 2);
+      ctx.fillStyle = col ? `rgba(${col[0]},${col[1]},${col[2]},0.98)` : "rgba(232,241,250,0.95)";
+      ctx.fill();
+    }
+    // plates, centered on their 3D points; cards last so they stay legible
+    const ordered = [...tags.filter((t) => !t.card), ...tags.filter((t) => t.card)];
+    for (const t of ordered) {
+      const x = t.q[0] - t.lw / 2, y = t.q[1] - t.h / 2;
+      if (t.card) {
+        const col = t.color || [160, 174, 188];
+        ctx.beginPath(); ctx.roundRect(x, y, t.lw, t.h, 4);
+        ctx.fillStyle = "rgba(8,11,16,0.92)"; ctx.fill();
+        ctx.strokeStyle = `rgba(${col[0]},${col[1]},${col[2]},0.52)`;
+        ctx.lineWidth = 0.9; ctx.stroke();
+        const barX = t.e[0] < t.q[0] ? x : x + t.lw - 2.2;
+        ctx.fillStyle = `rgba(${col[0]},${col[1]},${col[2]},0.9)`;
+        ctx.fillRect(barX, y + 5, 2.2, t.h - 10);
+        ctx.textAlign = "left"; ctx.textBaseline = "middle";
+        ctx.font = kickFont;
+        ctx.fillStyle = "rgba(158,173,188,0.9)";
+        ctx.fillText(t.kicker || "", x + 9, y + t.h * 0.33);
+        ctx.font = font;
+        ctx.fillStyle = t.on === false ? "rgba(170,184,198,0.9)" : `rgba(${col[0]},${col[1]},${col[2]},0.98)`;
+        ctx.fillText(t.label, x + 9, y + t.h * 0.7);
+      } else {
+        ctx.beginPath(); ctx.roundRect(x, y, t.lw, t.h, 3);
+        ctx.fillStyle = "rgba(8,11,16,0.9)"; ctx.fill();
+        ctx.strokeStyle = "rgba(152,172,192,0.32)"; ctx.lineWidth = 0.8; ctx.stroke();
+        ctx.font = font; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillStyle = "rgba(215,228,240,0.95)";
+        ctx.fillText(t.label, t.q[0], t.q[1] + 0.5);
+      }
+    }
+    ctx.restore();
+  }
+
+  // ---------------- particles ----------------
+  const spawn = new Map();
+  function updateParticles(dt, deg) {
+    for (const p of particles) {
+      p.t += dt * p.speed;
+      p.alpha = p.life * (1 - Math.max(0, p.t - 0.75) * 3);
+      const seg = Math.min(1, p.t);
+      const path = p.path;
+      const at = seg * (path.length - 1);
+      const i = Math.min(path.length - 2, Math.floor(at));
+      const f = at - i;
+      p.pos = [0, 1, 2].map((k) => path[i][k] + (path[i + 1][k] - path[i][k]) * f);
+    }
+    for (let i = particles.length - 1; i >= 0; i--) if (particles[i].t >= 1 || particles[i].alpha <= 0) particles.splice(i, 1);
+    for (const fl of FLOWS) {
+      const active = R13B.portPulse(R13B.phaseOf(deg, fl.chamber), fl.type);
+      if (active < 0.25) continue;
+      const key = `${fl.rotor}-${fl.type}`;
+      const t = (spawn.get(key) ?? 0) + dt;
+      const rate = 0.045;
+      if (t > rate) {
+        spawn.set(key, 0);
+        if (particles.length < 260) particles.push({ path: fl.points, t: 0, speed: 0.7 + rpm / 80, size: fl.type === "intake" ? 2.1 : 2.6, type: fl.type, life: fl.type === "intake" ? 0.55 : 0.7, alpha: 0.5, pos: fl.points[0] });
+      } else spawn.set(key, t);
+    }
+  }
+
+  // ---------------- interaction ----------------
+  let dragging = false, lastX = 0, lastY = 0, moved = 0;
+  setPointer(canvas);
+  function setPointer(el) {
+    el.addEventListener("pointerdown", (e) => {
+      dragging = true; lastX = e.clientX; lastY = e.clientY; moved = 0;
+      el.setPointerCapture(e.pointerId);
+      el.classList.add("dragging");
+    });
+    el.addEventListener("pointermove", (e) => {
+      if (!dragging) return;
+      camAnim = null;
+      const dx = e.clientX - lastX, dy = e.clientY - lastY;
+      lastX = e.clientX; lastY = e.clientY; moved += Math.abs(dx) + Math.abs(dy);
+      yaw += dx * 0.006;
+      pitch = clamp(pitch + dy * 0.005, -85 * DEG, 85 * DEG);
+      idleAt = performance.now() + 12000;
+    });
+    const end = () => { dragging = false; el.classList.remove("dragging"); };
+    el.addEventListener("pointerup", end);
+    el.addEventListener("pointercancel", end);
+    el.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      zoom = clamp(zoom * Math.exp(-e.deltaY * 0.0012), 0.55, 2.4);
+      idleAt = performance.now() + 12000;
+    }, { passive: false });
+    el.addEventListener("dblclick", () => { yaw = 28 * DEG; pitch = 23 * DEG; zoom = 1; });
+  }
+  for (const btn of document.querySelectorAll("[data-view]")) btn.addEventListener("click", () => goTo(btn.dataset.view));
+  rpmInput.addEventListener("input", () => {
+    rpm = Number(rpmInput.value);
+    rpmValue.textContent = String(rpm);
+    idleAt = performance.now() + 12000;
+  });
+  playBtn.addEventListener("click", () => {
+    playing = !playing;
+    playBtn.textContent = playing ? "Pause" : "Run";
+    playBtn.setAttribute("aria-pressed", String(!playing));
+    last = 0;
+  });
+  if (still.matches) { playing = false; playBtn.textContent = "Run"; }
+
+  // ---------------- size ----------------
+  function resize() {
+    const r = stage.getBoundingClientRect();
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    w = Math.max(320, Math.round(r.width));
+    h = Math.max(260, Math.round(r.height));
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    canvas.style.width = w + "px";
+    canvas.style.height = h + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    fit();
+  }
+  new ResizeObserver(resize).observe(stage);
+  resize();
+
+  window.__13b = {
+    setTheta(v) { theta = v; last = 0; },
+    setPose(a, e, z = 1) { camAnim = null; yaw = a * DEG; pitch = e * DEG; zoom = z; },
+    view(name) { goTo(name); },
+    setRpm(v) { rpm = v; rpmInput.value = String(v); rpmValue.textContent = String(v); },
+    state() { return { theta: ((theta % 1080) + 1080) % 1080, rpm, yaw: yaw / DEG, pitch: pitch / DEG, playing, particles: particles.length }; },
+    pause() { playing = false; playBtn.textContent = "Run"; },
+    play() { playing = true; playBtn.textContent = "Pause"; },
+  };
+
+  frame = requestAnimationFrame(render);
+})();
+
+</script></body></html>
